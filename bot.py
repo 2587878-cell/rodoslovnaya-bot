@@ -308,7 +308,23 @@ def save_to_google_sheets(data):
         print("✅ 2. Загружаем учётные данные...")
         
         # Попробуем прочитать файл
-        creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+        import os
+import json
+from oauth2client.service_account import ServiceAccountCredentials
+
+# Получаем JSON из переменной окружения
+json_creds = os.getenv("GOOGLE_CREDENTIALS")
+if not json_creds:
+    raise EnvironmentError("Переменная GOOGLE_CREDENTIALS не найдена")
+
+try:
+    # Преобразуем строку JSON в словарь
+    creds_dict = json.loads(json_creds)
+except json.JSONDecodeError as e:
+    raise ValueError(f"Ошибка парсинга JSON: {e}")
+
+# Создаём учётные данные из словаря
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
         print("✅ 3. Учётные данные загружены успешно")
         
         client = gspread.authorize(creds)
