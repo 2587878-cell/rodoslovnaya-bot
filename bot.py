@@ -333,6 +333,7 @@ def save_to_google_sheets(data):
             data.get("goal"),
             data.get("contact"),
             data.get("case_type")
+            data.get("recommendations") 
         ]
         sheet.append_row(row)
         print("✅ 7. ДАННЫЕ УСПЕШНО ДОБАВЛЕНЫ В ТАБЛИЦУ!")
@@ -377,17 +378,28 @@ async def handle_goal(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["contact"] = update.message.text
     data = context.user_data
-    case_text = f"{data['known']} {data['goal']}"
-    case_type = classify_case(case_text)
+    case_type = classify_case(f"{data['known']} {data['goal']}")
     data["case_type"] = case_type
 
-    # Сохраняем в Google Таблицу
-    save_to_google_sheets(data)
+    # Генерируем ответ
+    response = CASE_TEMPLATES.get(case_type, CASE_TEMPLATES["общий"])
+    final_response = f"🧠 Совет от Rodoslovnaya.pro:\n\n{response}\n\n📬 Нужна помощь?..."
 
     # Отправляем ответ
-    response = CASE_TEMPLATES.get(case_type, CASE_TEMPLATES["общий"])
-    await update.message.reply_text(response)
-    save_to_google_sheets(context.user_data)
+    await update.message.reply_text(final_response)
+
+    # Сохраняем ВСЁ, включая ответ
+    save_to_google_sheets({
+        "fio": data.get("fio"),
+        "dates": data.get("dates"),
+        "region": data.get("region"),
+        "known": data.get("known"),
+        "goal": data.get("goal"),
+        "contact": data.get("contact"),
+        "case_type": case_type,
+        "recommendations": response  # Сохраняем рекомендации
+    })
+
     return ConversationHandler.END
 
 def main():
