@@ -306,8 +306,8 @@ def save_to_google_sheets(data):
         
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
          print("✅ 6. ДАННЫЕ УСПЕШНО ДОБАВЛЕНЫ В ТАБЛИЦУ!")
-     except Exception as e:
-        print(f"❌ ОШИБКА: {e}")   
+    except Exception as e:
+        print(f"❌ ОШИБКА: {e}")
          
         # Попробуем прочитать файл
         import os
