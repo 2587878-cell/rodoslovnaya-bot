@@ -80,6 +80,8 @@ async def handle_goal(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["contact"] = update.message.text
     data = context.user_data
+    case_type = classify_case(f"{data['known']} {data['goal']}")
+    data["case_type"] = case_type
 
     # Формируем промпт для OpenAI
     prompt = f"""
@@ -105,10 +107,16 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
 
     try:
+        # 🔽 ВСТАВЬ СЮДА ПРОВЕРКУ КЛЮЧА 🔽
         from openai import OpenAI
-        # Явно передаём ключ из переменной окружения
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise EnvironmentError("OPENAI_API_KEY не найден!")
+
+        client = OpenAI(api_key=api_key)
+        # 🔼 ВСТАВЬ СЮДА ПРОВЕРКУ КЛЮЧА 🔼
+
+        # Теперь вызываем OpenAI
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -125,7 +133,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Отправляем ответ пользователю
     await update.message.reply_text(response)
 
-    # Сохраняем в Google Таблицу (включая ответ)
+    # Сохраняем в Google Таблицу
     save_to_google_sheets({
         "fio": data.get("fio"),
         "dates": data.get("dates"),
@@ -133,7 +141,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "known": data.get("known"),
         "goal": data.get("goal"),
         "contact": data.get("contact"),
-        "case_type": classify_case(f"{data['known']} {data['goal']}"),
+        "case_type": case_type,
         "recommendations": response
     })
 
