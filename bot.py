@@ -105,7 +105,10 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
 
     try:
-        completion = openai.ChatCompletion.create(
+        from openai import OpenAI
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    
+        completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "Ты — профессиональный генеалог. Пиши чётко, по делу, с источниками, тарифами и ссылками."},
@@ -114,7 +117,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
             max_tokens=1500,
             temperature=0.7
         )
-        response = completion.choices[0].message.content.strip()
+        response = completion.choices[0].message.content
     except Exception as e:
         response = f"⚠️ Ошибка при генерации совета: {str(e)}\n\nПопробуйте позже или напишите нам напрямую."
 
