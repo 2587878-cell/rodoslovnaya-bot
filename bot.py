@@ -180,19 +180,7 @@ def main():
         logger.error("Токен не найден! Установите переменную TELEGRAM_TOKEN")
         return
 
-    app = (
-        Application.builder()
-        .token(TOKEN)
-        .read_timeout(30)
-        .write_timeout(30)
-        .connect_timeout(30)
-        .pool_timeout(30)
-        .build()
-    )
-
-    app.add_handler(conv_handler)
-    app.run_polling()
-
+    # СНАЧАЛА создаём обработчик диалога
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
@@ -206,7 +194,21 @@ def main():
         fallbacks=[]
     )
 
+    # ПОТОМ создаём приложение
+    app = (
+        Application.builder()
+        .token(TOKEN)
+        .read_timeout(30)
+        .write_timeout(30)
+        .connect_timeout(30)
+        .pool_timeout(30)
+        .build()
+    )
+
+    # И ТОЛЬКО ПОТОМ добавляем обработчик
     app.add_handler(conv_handler)
+
+    # Запускаем бота
     app.run_polling()
 
 if __name__ == "__main__":
