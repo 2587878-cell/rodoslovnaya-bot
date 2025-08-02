@@ -303,38 +303,26 @@ def classify_case(text):
 def save_to_google_sheets(data):
     try:
         print("✅ 1. Начинаем сохранение в Google Таблицу...")
-        
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-         print("✅ 6. ДАННЫЕ УСПЕШНО ДОБАВЛЕНЫ В ТАБЛИЦУ!")
-    except Exception as e:
-        print(f"❌ ОШИБКА: {e}")
-         
-        # Попробуем прочитать файл
-        import os
-import json
-from oauth2client.service_account import ServiceAccountCredentials
+        print("✅ 2. Загружаем учётные данные...")
 
-# Получаем JSON из переменной окружения
-json_creds = os.getenv("GOOGLE_CREDENTIALS")
-if not json_creds:
-    raise EnvironmentError("Переменная GOOGLE_CREDENTIALS не найдена")
+        # Получаем JSON из переменной
+        json_creds = os.getenv("GOOGLE_CREDENTIALS")
+        if not json_creds:
+            raise EnvironmentError("Переменная GOOGLE_CREDENTIALS не найдена")
 
-try:
-    # Преобразуем строку JSON в словарь
-    creds_dict = json.loads(json_creds)
-except json.JSONDecodeError as e:
-    raise ValueError(f"Ошибка парсинга JSON: {e}")
+        creds_dict = json.loads(json_creds)
+        print("✅ 3. JSON успешно распарсен")
 
-# Создаём учётные данные из словаря
-creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-        print("✅ 3. Учётные данные загружены успешно")
-        
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        print("✅ 4. Учётные данные созданы")
+
         client = gspread.authorize(creds)
-        print("✅ 4. Подключились к Google Sheets API")
-        
+        print("✅ 5. Подключились к Google Sheets API")
+
         sheet = client.open_by_url(os.getenv("GOOGLE_SHEET_URL")).sheet1
-        print("✅ 5. Подключились к таблице")
-        
+        print("✅ 6. Подключились к таблице")
+
         row = [
             datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             data.get("fio"),
@@ -345,14 +333,11 @@ creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
             data.get("contact"),
             data.get("case_type")
         ]
-        
         sheet.append_row(row)
-        print("✅ 6. ДАННЫЕ УСПЕШНО СОХРАНЕНЫ В ТАБЛИЦУ!")
-        
+        print("✅ 7. ДАННЫЕ УСПЕШНО ДОБАВЛЕНЫ В ТАБЛИЦУ!")
     except Exception as e:
         print(f"❌ ОШИБКА: {e}")
         import traceback
-        print("Полный трейсбэк:")
         traceback.print_exc()
 # Команда /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
