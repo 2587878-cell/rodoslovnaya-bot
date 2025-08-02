@@ -302,24 +302,21 @@ def classify_case(text):
 # Google Sheets
 def save_to_google_sheets(data):
     try:
+        print("✅ 1. Начинаем сохранение в Google Таблицу...")
+        
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        # Новый способ — читаем из переменной
-import json
-from io import StringIO
-
-json_creds = os.getenv("GOOGLE_CREDENTIALS")
-if not json_creds:
-    raise EnvironmentError("Переменная GOOGLE_CREDENTIALS не найдена")
-
-try:
-    creds_dict = json.loads(json_creds)
-except json.JSONDecodeError as e:
-    raise ValueError(f"Ошибка парсинга JSON: {e}")
-
-creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        print("✅ 2. Загружаем учётные данные...")
+        
+        # Попробуем прочитать файл
+        creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+        print("✅ 3. Учётные данные загружены успешно")
+        
         client = gspread.authorize(creds)
+        print("✅ 4. Подключились к Google Sheets API")
+        
         sheet = client.open_by_url(os.getenv("GOOGLE_SHEET_URL")).sheet1
-
+        print("✅ 5. Подключились к таблице")
+        
         row = [
             datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             data.get("fio"),
@@ -330,10 +327,15 @@ creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
             data.get("contact"),
             data.get("case_type")
         ]
+        
         sheet.append_row(row)
+        print("✅ 6. ДАННЫЕ УСПЕШНО СОХРАНЕНЫ В ТАБЛИЦУ!")
+        
     except Exception as e:
-        logger.error(f"Ошибка Google Sheets: {e}")
-
+        print(f"❌ ОШИБКА: {e}")
+        import traceback
+        print("Полный трейсбэк:")
+        traceback.print_exc()
 # Команда /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
