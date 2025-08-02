@@ -332,7 +332,7 @@ def save_to_google_sheets(data):
             data.get("known"),
             data.get("goal"),
             data.get("contact"),
-            data.get("case_type")
+            data.get("case_type"),
             data.get("recommendations") 
         ]
         sheet.append_row(row)
