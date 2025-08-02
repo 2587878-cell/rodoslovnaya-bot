@@ -383,6 +383,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Отправляем ответ
     response = CASE_TEMPLATES.get(case_type, CASE_TEMPLATES["общий"])
     await update.message.reply_text(response)
+    save_to_google_sheets(context.user_data)
     return ConversationHandler.END
 
 def main():
