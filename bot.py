@@ -106,6 +106,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         from openai import OpenAI
+        # Явно передаём ключ из переменной окружения
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     
         completion = client.chat.completions.create(
