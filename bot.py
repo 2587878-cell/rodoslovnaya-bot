@@ -303,7 +303,20 @@ def classify_case(text):
 def save_to_google_sheets(data):
     try:
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+        # Новый способ — читаем из переменной
+import json
+from io import StringIO
+
+json_creds = os.getenv("GOOGLE_CREDENTIALS")
+if not json_creds:
+    raise EnvironmentError("Переменная GOOGLE_CREDENTIALS не найдена")
+
+try:
+    creds_dict = json.loads(json_creds)
+except json.JSONDecodeError as e:
+    raise ValueError(f"Ошибка парсинга JSON: {e}")
+
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
         client = gspread.authorize(creds)
         sheet = client.open_by_url(os.getenv("GOOGLE_SHEET_URL")).sheet1
 
