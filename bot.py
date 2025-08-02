@@ -1,6 +1,7 @@
 # bot.py
 import os
 import logging
+import json
 from telegram import Update
 from telegram.ext import (
     Application,
