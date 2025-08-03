@@ -104,33 +104,33 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
 
     try:
-    # Проверка ключа
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        raise EnvironmentError("OPENAI_API_KEY не найден!")
-
-    client = OpenAI(api_key=api_key)
-
-    completion = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "Ты — профессиональный генеалог. Пиши чётко, по делу, с источниками, тарифами и ссылками. Не добавляй вступления вроде 'Вот пошаговая стратегия' — начинай сразу с содержания."},
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=1500,
-        temperature=0.7
-    )
-    ai_response = completion.choices[0].message.content.strip()
-
-    # Оборачиваем ответ в фирменный стиль
-    response = f"""🧠 Rodoslovnaya.PRO рекомендует:
-
-{ai_response}
-
-📬 Нужна помощь?
-Заполните заявку на сайте rodoslovnaya.pro,
-напишите нам на predki@rodoslovnaya.pro
-или в Telegram @rodoslovnaya_pro"""
+        # Проверка ключа
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise EnvironmentError("OPENAI_API_KEY не найден!")
+    
+        client = OpenAI(api_key=api_key)
+    
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "Ты — профессиональный генеалог. Пиши чётко, по делу, с источниками, тарифами и ссылками. Не добавляй вступления вроде 'Вот пошаговая стратегия' — начинай сразу с содержания."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=1500,
+            temperature=0.7
+        )
+        ai_response = completion.choices[0].message.content.strip()
+    
+        # Оборачиваем ответ в фирменный стиль
+        response = f"""🧠 Rodoslovnaya.PRO рекомендует:
+    
+    {ai_response}
+    
+    📬 Нужна помощь?
+    Заполните заявку на сайте rodoslovnaya.pro,
+    напишите нам на predki@rodoslovnaya.pro
+    или в Telegram @rodoslovnaya_pro"""
     except Exception as e:
         response = f"⚠️ Ошибка при генерации совета: {str(e)}\n\nПопробуйте позже или напишите нам напрямую."
 
