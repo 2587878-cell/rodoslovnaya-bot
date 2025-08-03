@@ -186,7 +186,18 @@ def main():
     if not TOKEN:
         logger.error("Токен не найден! Установите переменную TELEGRAM_TOKEN")
         return
+    # 🔽 ДОБАВЬ СЮДА ПРИНТ 🔽
+    print(f"TELEGRAM_TOKEN: {'Да, есть' if TOKEN else 'Нет!'}")
+    print(f"OPENAI_API_KEY: {os.getenv('OPENAI_API_KEY')}")
+    print(f"GOOGLE_SHEET_URL: {os.getenv('GOOGLE_SHEET_URL')}")
+    # 🔼 ДОБАВЬ СЮДА ПРИНТ 🔼
 
+    # Проверка OpenAI API Key
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        logger.error("OPENAI_API_KEY не найден! Бот не сможет генерировать советы.")
+        return
+        
     # Создаём обработчик диалога
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
