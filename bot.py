@@ -43,35 +43,57 @@ def classify_case(text):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "👋 Привет! Я — бот проекта Rodoslovnaya.pro.\n"
-        "Готов помочь тебе в поиске предков.\n"
-        "Напиши ФИО предка, историю которого хочешь исследовать."
+        "👋 Здравствуйте! Я — бот проекта Rodoslovnaya.pro.\n"
+        "Помогаю восстанавливать судьбы предков по документам и архивам.\n"
+        "Расскажите о предке, чью историю Вы хотели бы исследовать.\n\n"
+        "📌 Начнём с ФИО предка:"
     )
     return STEP_FIO
 
 async def handle_fio(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["fio"] = update.message.text
-    await update.message.reply_text("📆 Примерные годы жизни?")
+    await update.message.reply_text("📅 Примерные годы жизни предка (например: 1890–1942):")
     return STEP_DATES
 
 async def handle_dates(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["dates"] = update.message.text
-    await update.message.reply_text("📍 Где жил предок?")
+    await update.message.reply_text(
+    "📍 Где жил предок? Укажите:\n"
+    "• Место рождения (деревня, село, город)\n"
+    "• Где проживал\n"
+    "• Где умер и похоронен (если известно)\n\n"
+    "Пример: родился Петрово, Рязанская обл., затем Оренбургская область, умер в Алексине Тульская область"
+)
     return STEP_REGION
 
 async def handle_region(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["region"] = update.message.text
-    await update.message.reply_text("📄 Что ты уже знаешь о нём?")
+    await update.message.reply_text(
+    "📚 Что Вы уже знаете о предке?\n"
+    "Укажите всё, что передавали в семье:\n"
+    "• Профессия, военная служба\n"
+    "• Судьба в войну, репрессии, плен\n"
+    "• Родственные связи (отец, мать — по имени-отчеству)\n"
+    "• Интересные факты (например: «делал волокуши», «капитан с Кронштадта»)"
+)
     return STEP_KNOWN
 
 async def handle_known(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["known"] = update.message.text
-    await update.message.reply_text("🔍 Что хочешь узнать?")
+    await update.message.reply_text(
+    "🎯 Что бы Вы хотели узнать о предке и его фамильном роде?\n"
+    "Выберите или укажите:\n"
+    "• Кто были его родители?\n"
+    "• Где он родился и где похоронен?\n"
+    "• Какова была его судьба в войну или в репрессиях?\n"
+    "• Из какого он рода, есть ли более ранние предки?\n"
+    "• Что подтвердит его подвиг или трудовой путь?"
+)
     return STEP_GOAL
 
 async def handle_goal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["goal"] = update.message.text
-    await update.message.reply_text("📬 Оставь Telegram или email для связи:")
+    await update.message.reply_text("📬 Оставьте, пожалуйста, Telegram или email для связи:")
     return STEP_CONTACT
 
 async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
