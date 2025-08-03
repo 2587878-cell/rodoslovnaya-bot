@@ -1,7 +1,7 @@
 # bot.py
 import os
 import logging
-import json
+import json  # ✅ Убедись, что импорт json здесь
 from telegram import Update
 from telegram.ext import (
     Application,
@@ -13,20 +13,17 @@ from telegram.ext import (
 )
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import openai
+from openai import OpenAI  # ✅ Импортируем здесь
 from datetime import datetime
 
 # Настройка логирования
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Устанавливаем API-ключ OpenAI
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
 # Состояния анкеты
 STEP_FIO, STEP_DATES, STEP_REGION, STEP_KNOWN, STEP_GOAL, STEP_CONTACT = range(6)
 
-# Классификация кейса (опционально — можно использовать для анализа)
+# Классификация кейса
 def classify_case(text):
     text = text.lower()
     if any(k in text for k in ["арестован", "расстрелян", "реабилитирован", "тройка", "нквд", "к-р", "шпион"]):
@@ -107,16 +104,13 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
 
     try:
-        # 🔽 ВСТАВЬ СЮДА ПРОВЕРКУ КЛЮЧА 🔽
-        from openai import OpenAI
+        # Проверка ключа
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             raise EnvironmentError("OPENAI_API_KEY не найден!")
 
         client = OpenAI(api_key=api_key)
-        # 🔼 ВСТАВЬ СЮДА ПРОВЕРКУ КЛЮЧА 🔼
 
-        # Теперь вызываем OpenAI
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -130,10 +124,10 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         response = f"⚠️ Ошибка при генерации совета: {str(e)}\n\nПопробуйте позже или напишите нам напрямую."
 
-    # Отправляем ответ пользователю
+    # Отправляем ответ
     await update.message.reply_text(response)
 
-    # Сохраняем в Google Таблицу
+    # Сохраняем в таблицу
     save_to_google_sheets({
         "fio": data.get("fio"),
         "dates": data.get("dates"),
@@ -150,14 +144,15 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def save_to_google_sheets(data):
     try:
         print("✅ 1. Начинаем сохранение в Google Таблицу...")
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        scope = [
+            "https://spreadsheets.google.com/feeds",
+            "https://www.googleapis.com/auth/drive"
+        ]  # ✅ Исправлено: убраны пробелы
         
-        # Читаем JSON из переменной
         json_creds = os.getenv("GOOGLE_CREDENTIALS")
         if not json_creds:
             raise EnvironmentError("Переменная GOOGLE_CREDENTIALS не найдена")
         
-        import json
         creds_dict = json.loads(json_creds)
         print("✅ 2. JSON успешно распарсен")
 
@@ -179,7 +174,7 @@ def save_to_google_sheets(data):
             data.get("goal"),
             data.get("contact"),
             data.get("case_type"),
-            data.get("recommendations")  # Полный ответ бота
+            data.get("recommendations")
         ]
         sheet.append_row(row)
         print("✅ 6. ДАННЫЕ УСПЕШНО ДОБАВЛЕНЫ В ТАБЛИЦУ!")
@@ -192,7 +187,7 @@ def main():
         logger.error("Токен не найден! Установите переменную TELEGRAM_TOKEN")
         return
 
-    # СНАЧАЛА создаём обработчик диалога
+    # Создаём обработчик диалога
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
@@ -206,7 +201,7 @@ def main():
         fallbacks=[]
     )
 
-    # ПОТОМ создаём приложение
+    # Создаём приложение
     app = (
         Application.builder()
         .token(TOKEN)
@@ -217,11 +212,12 @@ def main():
         .build()
     )
 
-    # И ТОЛЬКО ПОТОМ добавляем обработчик
+    # Добавляем обработчик
     app.add_handler(conv_handler)
 
     # Запускаем бота
     app.run_polling()
 
+# ✅ Запускаем main()
 if __name__ == "__main__":
     main()
