@@ -108,6 +108,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     "Подождите немного — скоро вы получите подробный план поиска.",
     parse_mode="HTML"
 )
+    await update.message.reply_chat_action("typing")
     # Формируем промпт для OpenAI
     prompt = f"""
 Составь пошаговую стратегию поиска предков на основе данных:
