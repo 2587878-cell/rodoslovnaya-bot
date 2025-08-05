@@ -171,7 +171,6 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 - На русском языке
 
 {source_context}
-{archive_context}
 """
 
     try:
