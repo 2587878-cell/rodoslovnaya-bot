@@ -15,6 +15,42 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from openai import OpenAI  # ✅ Импортируем здесь
 from datetime import datetime
+import pandas as pd
+import os
+
+# Глобальная переменная для хранения данных архивов
+ARCHIVE_INFO = {}
+
+def load_archive_data():
+    """Загружает данные из Excel-файла в словарь ARCHIVE_INFO"""
+    file_path = "фильтрация 20.06.2024.xlsx"
+    if not os.path.exists(file_path):
+        print(f"❌ Файл {file_path} не найден!")
+        return
+
+    try:
+        df = pd.read_excel(file_path, sheet_name=0)  # Читаем первый лист
+        print(f"✅ Загружено {len(df)} строк из {file_path}")
+
+        # Очищаем и нормализуем данные
+        for _, row in df.iterrows():
+            region = str(row["Регион"]).strip().lower()
+            name = row["Организация"]
+            fund = row.get("Фонд", "нет данных")
+            docs = row.get("Тип документов", "нет данных")
+            url = row.get("Сайт", "")
+
+            # Поддержка нескольких архивов по одному региону
+            if region not in ARCHIVE_INFO:
+                ARCHIVE_INFO[region] = []
+            ARCHIVE_INFO[region].append({
+                "name": name,
+                "fund": fund,
+                "docs": docs,
+                "url": url
+            })
+    except Exception as e:
+        print(f"❌ Ошибка при загрузке файла: {e}")
 
 # Настройка логирования
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -148,6 +184,39 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     • [Yandex.Архив](https://yandex.ru/archive) — газеты, справочники, переписи
     • [Forum.VGD.ru](https://forum.vgd.ru) — консультации генеалогов
     """
+   
+def get_archive_recommendation(region: str, known: str) -> str:
+    """
+    Возвращает рекомендацию по архиву, если предок был в плену.
+    """
+    keywords = ["плен", "репатри", "остарбайтер", "фильтрац", "проверка", 
+                "военноплен", "угнан", "трудармия", "лагерь", "допрос", "следствие"]
+    
+    if not any(k in known.lower() for k in keywords):
+        return ""
+
+    region_lower = region.lower().strip()
+    recommendations = []
+
+    for key, archives in ARCHIVE_INFO.items():
+        if key in region_lower:
+            for archive in archives:
+                recommendations.append(
+                    f"• Обратитесь в: {archive['name']}\n"
+                    f"  — Фонд: {archive['fund']}\n"
+                    f"  — Тип документов: {archive['docs']}\n"
+                    f"  — Сайт: {archive['url']}"
+                )
+            break
+
+    if recommendations:
+        return "\n\n🔍 Для военнопленных и репатриированных:\n" + "\n".join(recommendations)
+    else:
+        return (
+            "\n\n🔍 Для военнопленных:\n"
+            "• Уточните регион проживания предка — в базе нет точных данных\n"
+            "• Рекомендуем обратиться в УФСБ или информационный центр МВД по региону"
+        )    
     # Формируем промпт для OpenAI
     prompt = f"""
 Составь пошаговую стратегию поиска предков на основе данных:
@@ -262,6 +331,9 @@ def save_to_google_sheets(data):
         print(f"❌ ОШИБКА при сохранении: {e}")
 
 def main():
+      # Загружаем данные из Excel
+    load_archive_data()
+    
     TOKEN = os.getenv("TELEGRAM_TOKEN")
     if not TOKEN:
         logger.error("Токен не найден! Установите переменную TELEGRAM_TOKEN")
