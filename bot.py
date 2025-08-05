@@ -728,7 +728,6 @@ prompt = f"""
 - На русском языке
 {archive_context}
     """
-
     try:
         # Проверка ключа
         api_key = os.getenv("OPENAI_API_KEY")
