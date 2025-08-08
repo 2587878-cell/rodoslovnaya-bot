@@ -116,7 +116,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     async def send_delay_notification():
         nonlocal sent_delay_message
-        await asyncio.sleep(7)
+        await asyncio.sleep(5)
         if not sent_delay_message:
             sent_delay_message = True
             await update.message.reply_text(
