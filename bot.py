@@ -94,7 +94,7 @@ async def handle_known(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_goal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["goal"] = update.message.text
-    await update.message.reply_text("📬 Оставьте, пожалуйста, Telegram или email для связи:")
+    await update.message.reply_text("📬 Оставьте, пожалуйста, Ваш Telegram или email для связи:")
     return STEP_CONTACT
 
 async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -116,7 +116,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     async def send_delay_notification():
         nonlocal sent_delay_message
-        await asyncio.sleep(10)
+        await asyncio.sleep(7)
         if not sent_delay_message:
             sent_delay_message = True
             await update.message.reply_text(
@@ -218,7 +218,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     напишите нам на predki@rodoslovnaya.pro
     или в Telegram @rodoslovnaya_pro"""
     except Exception as e:
-        response = f"⚠️ Ошибка при генерации совета: {str(e)}\n\nПопробуйте позже или напишите нам напрямую."
+        response = f"⚠️ Что-то пошло не так: {str(e)}\n\nПопробуйте позже или напишите нам напрямую."
 
     # Отправляем ответ
     await update.message.reply_text(response)
