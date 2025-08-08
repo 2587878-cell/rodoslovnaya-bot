@@ -110,18 +110,18 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     parse_mode="HTML"
 )
     await update.message.reply_chat_action("typing")
-    # 🔽 ДОБАВЬ СЮДА ОЖИДАНИЕ С УВЕДОМЛЕНИЕМ 🔽
-    response = None
-    sent_delay_message = False
+     # Переменные для контроля
+    response_sent = False
+    delay_task = None
 
     async def send_delay_notification():
-        nonlocal sent_delay_message
-        await asyncio.sleep(5)
-        if not sent_delay_message:
-            sent_delay_message = True
+        nonlocal response_sent
+        await asyncio.sleep(10)
+        if not response_sent:
             await update.message.reply_text(
-                "⏳ Ваш генеалог анализирует данные — подождите немного, уже вот-вот..."
+                "⏳ Ваш генеалог формирует отчет — подождите немного, уже вот-вот..."
             )
+            
     # Запускаем уведомление в фоне
     delay_task = asyncio.create_task(send_delay_notification())
 
@@ -217,8 +217,17 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Заполните заявку на сайте rodoslovnaya.pro,
     напишите нам на predki@rodoslovnaya.pro
     или в Telegram @rodoslovnaya_pro"""
+    
+    # Отправляем ответ
+    await update.message.reply_text(response)
+        response_sent = True  # ✅ Отмечаем, что ответ отправлен
     except Exception as e:
-        response = f"⚠️ Что-то пошло не так: {str(e)}\n\nПопробуйте позже или напишите нам напрямую."
+        response = f"⚠️ Что-то пошло не так: {str(e)}\n\n Пожалуйста, попробуйте позже или напишите нам напрямую."
+                response_sent = True
+    finally:
+        # Отменяем задачу уведомления, если она ещё работает
+        if delay_task and not delay_task.done():
+            delay_task.cancel()
 
     # Отправляем ответ
     await update.message.reply_text(response)
