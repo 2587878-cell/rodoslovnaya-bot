@@ -109,6 +109,20 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     parse_mode="HTML"
 )
     await update.message.reply_chat_action("typing")
+    # 🔽 ДОБАВЬ СЮДА ОЖИДАНИЕ С УВЕДОМЛЕНИЕМ 🔽
+    response = None
+    sent_delay_message = False
+
+    async def send_delay_notification():
+        nonlocal sent_delay_message
+        await asyncio.sleep(10)
+        if not sent_delay_message:
+            sent_delay_message = True
+            await update.message.reply_text(
+                "⏳ Ваш генеалог анализирует данные — подождите немного, уже вот-вот..."
+            )
+    # Запускаем уведомление в фоне
+    delay_task = asyncio.create_task(send_delay_notification())
 
     # Извлекаем год рождения из строки "даты"
     import re
