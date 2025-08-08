@@ -188,7 +188,6 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 {source_context}
 """
-
     try:
         # Проверка ключа
         api_key = os.getenv("OPENAI_API_KEY")
@@ -218,19 +217,16 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     напишите нам на predki@rodoslovnaya.pro
     или в Telegram @rodoslovnaya_pro"""
     
-    # Отправляем ответ
-    await update.message.reply_text(response)
+        # Отправляем ответ
+        await update.message.reply_text(response)
         response_sent = True  # ✅ Отмечаем, что ответ отправлен
     except Exception as e:
         response = f"⚠️ Что-то пошло не так: {str(e)}\n\n Пожалуйста, попробуйте позже или напишите нам напрямую."
-                response_sent = True
+        response_sent = True
     finally:
         # Отменяем задачу уведомления, если она ещё работает
         if delay_task and not delay_task.done():
             delay_task.cancel()
-
-    # Отправляем ответ
-    await update.message.reply_text(response)
 
     # Сохраняем в таблицу
     save_to_google_sheets({
