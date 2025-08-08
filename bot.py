@@ -2,6 +2,7 @@
 import os
 import logging
 import json  # ✅ Убедись, что импорт json здесь
+import asyncio  # <-- ЭТА СТРОКА ДОЛЖНА БЫТЬ!
 from telegram import Update
 from telegram.ext import (
     Application,
