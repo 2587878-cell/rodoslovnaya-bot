@@ -308,7 +308,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "region": data.get("region"),
         "known": data.get("known"),
         "goal": data.get("goal"),
-        "chat_id": data.get("chat_id")  # ✅ Передаём в таблицу
+        "chat_id": data.get("chat_id"), # ✅ Передаём в таблицу
         "contact": data.get("contact"),
         "case_type": case_type,
         "recommendations": response
