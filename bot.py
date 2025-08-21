@@ -21,6 +21,54 @@ from datetime import datetime
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+import re
+
+def parse_contact(raw_contact: str):
+    if not raw_contact:
+        return {"email": None, "phone": None, "telegram": None}
+
+    text = raw_contact.lower().strip()
+    result = {
+        "raw": raw_contact,
+        "email": None,
+        "phone": None,
+        "telegram": None
+    }
+
+    # 1. Email
+    email_match = re.search(r'\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b', text)
+    if email_match:
+        result["email"] = email_match.group()
+
+    # 2. Телефон (международный)
+    phone_match = re.search(r'\+\d{1,3}[\s\-()]*?\d[\s\-()]*?(\d[\s\-()]*?){6,14}', text)
+    if phone_match:
+        digits = re.sub(r'\D', '', phone_match.group())
+        if len(digits) >= 7 and len(digits) <= 15:
+            result["phone"] = '+' + digits
+    else:
+        # Проверка на российский номер без +
+        plain_match = re.search(r'(?:\+?7|8)[\s\-()]*?(\d[\s\-()]*?){10}', text)
+        if plain_match:
+            digits = re.sub(r'\D', '', plain_match.group())
+            if len(digits) == 11 and digits.startswith('8'):
+                digits = '7' + digits[1:]
+            elif len(digits) == 10:
+                digits = '7' + digits
+            result["phone"] = f"+{digits}"
+
+    # 3. Telegram
+    tg_match = re.search(
+        r'(?:@|t\.me/|https?://t\.me/)([a-zA-Z0-9_]{5,})|([a-zA-Z0-9_]{5,})(?=\s|$)', 
+        text
+    )
+    if tg_match:
+        username = tg_match.group(1) or tg_match.group(2)
+        if username and len(username) >= 5:
+            result["telegram"] = f"@{username}"
+
+    return result
+
 # Состояния анкеты
 STEP_FIO, STEP_DATES, STEP_REGION, STEP_KNOWN, STEP_GOAL, STEP_CONTACT = range(6)
 
@@ -110,6 +158,14 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 🔼
     case_type = classify_case(f"{data['known']} {data['goal']}")
     data["case_type"] = case_type
+
+    # 3. Парсим контакт
+    contact_raw = update.message.text
+    parsed_contact = parse_contact(contact_raw)
+    data["contact_raw"] = contact_raw
+    data["email"] = parsed_contact["email"]
+    data["phone"] = parsed_contact["phone"]
+    data["telegram"] = parsed_contact["telegram"]
     
     await update.message.reply_text(
     "<b> 🔍 Спасибо за анкету!</b>\n"
@@ -134,8 +190,6 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     delay_task = asyncio.create_task(send_delay_notification())
 
     # Извлекаем год рождения из строки "даты"
-    import re
-    
     birth_year = None
     if data.get("dates"):
         # Находим все 4-значные числа в диапазоне 1700–2025
@@ -300,8 +354,11 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "region": data.get("region"),
         "known": data.get("known"),
         "goal": data.get("goal"),
-        "chat_id": data.get("chat_id"), # ✅ Передаём в таблицу
+        "chat_id": data.get("chat_id"),
         "contact": data.get("contact"),
+        "email": data.get("email"),
+        "phone": data.get("phone"),
+        "telegram": data.get("telegram"),
         "case_type": case_type,
         "recommendations": response
     })
@@ -342,8 +399,11 @@ def save_to_google_sheets(data):
             data.get("region"),
             data.get("known"),
             data.get("goal"),
-            chat_id, # ⬅️ Добавляем chat_id
+            chat_id, 
             data.get("contact"),
+            data.get("email"),
+            data.get("phone"),
+            data.get("telegram"),
             data.get("case_type"),
             data.get("recommendations")
         ]
