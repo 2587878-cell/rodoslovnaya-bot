@@ -172,14 +172,6 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     • [Yandex.Архив](https://yandex.ru/archive) — газеты, справочники, переписи
     • [Forum.VGD.ru](https://forum.vgd.ru) — консультации генеалогов
     """
-    # 🔽 ИЗВЛЕКАЕМ ФАМИЛИЮ 🔽
-    full_name = data.get("fio", "").strip()
-    surname = ""
-    if full_name:
-        parts = full_name.split()
-        if len(parts) >= 1:
-            surname = parts[0].strip()
-    # 🔼
     
     # 🔽 ФОРМИРУЕМ АНАЛИЗ ФАМИЛИИ 🔽
     surname_analysis = "Фамилия не указана."
@@ -227,7 +219,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 - Без общих фраз — только конкретика
 - На русском языке
 
-{source_context} # ⬅️ Добавляем анализ источников
+{source_context}
 """
     try:
         # Проверка ключа
