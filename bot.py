@@ -40,27 +40,23 @@ def parse_contact(raw_contact: str):
     if email_match:
         result["email"] = email_match.group()
 
-    # 2. Телефон (международный)
-    phone_match = re.search(r'\+\d{1,3}[\s\-()]*?\d[\s\-()]*?(\d[\s\-()]*?){6,14}', text)
+    # 2. Телефон
+    phone_match = re.search(r'(?:\+?7|8)[\s\-()]*?(\d[\s\-()]*?){10}', text)
     if phone_match:
         digits = re.sub(r'\D', '', phone_match.group())
-        if len(digits) >= 7 and len(digits) <= 15:
-            result["phone"] = '+' + digits
-    else:
-        # Проверка на российский номер без +
-        plain_match = re.search(r'(?:\+?7|8)[\s\-()]*?(\d[\s\-()]*?){10}', text)
-        if plain_match:
-            digits = re.sub(r'\D', '', plain_match.group())
-            if len(digits) == 11 and digits.startswith('8'):
-                digits = '7' + digits[1:]
-            elif len(digits) == 10:
-                digits = '7' + digits
-            result["phone"] = f"+{digits}"
+        if len(digits) == 11 and digits.startswith('8'):
+            digits = '7' + digits[1:]
+        elif len(digits) == 10:
+            digits = '7' + digits
+        result["phone"] = f"+{digits}"
 
-    # 3. Telegram
+    # 3. Telegram — только если НЕ часть email
+    # Убираем все email из текста, чтобы не ловить @gmail.com
+    clean_text = re.sub(r'\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b', '', text)
+
     tg_match = re.search(
-        r'(?:@|t\.me/|https?://t\.me/)([a-zA-Z0-9_]{5,})|([a-zA-Z0-9_]{5,})(?=\s|$)', 
-        text
+        r'(?:@|t\.me/|https?://t\.me/)([a-zA-Z0-9_]{5,})|([a-zA-Z0-9_]{5,})(?=\s|$)',
+        clean_text
     )
     if tg_match:
         username = tg_match.group(1) or tg_match.group(2)
