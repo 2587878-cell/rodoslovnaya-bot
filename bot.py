@@ -55,12 +55,12 @@ def parse_contact(raw_contact: str):
     clean_text = re.sub(r'\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b', '', text)
 
     tg_match = re.search(
-        r'(?:@|t\.me/|https?://t\.me/)([a-zA-Z0-9_]{5,})|([a-zA-Z0-9_]{5,})(?=\s|$)',
+        r'(?:@|t\.me/|https?://t\.me/)([a-zA-Z][a-zA-Z0-9_]{4,})|([a-zA-Z][a-zA-Z0-9_]{4,})(?=\s|$)',
         clean_text
     )
     if tg_match:
         username = tg_match.group(1) or tg_match.group(2)
-        if username and len(username) >= 5:
+        if username and len(username) >= 5 and not username.isdigit():
             result["telegram"] = f"@{username}"
 
     return result
