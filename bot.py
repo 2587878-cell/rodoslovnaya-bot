@@ -299,6 +299,8 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if delay_task and not delay_task.done():
             delay_task.cancel()
 
+    # Сохраняем chat_id
+    data["chat_id"] = update.effective_chat.id
     # Сохраняем в таблицу
     save_to_google_sheets({
         "fio": data.get("fio"),
@@ -306,6 +308,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "region": data.get("region"),
         "known": data.get("known"),
         "goal": data.get("goal"),
+        "chat_id": data.get("chat_id")  # ✅ Передаём в таблицу
         "contact": data.get("contact"),
         "case_type": case_type,
         "recommendations": response
@@ -337,6 +340,9 @@ def save_to_google_sheets(data):
         sheet = client.open_by_url(os.getenv("GOOGLE_SHEET_URL")).sheet1
         print("✅ 5. Подключились к таблице")
 
+        # Получаем chat_id из данных
+        chat_id = data.get("chat_id", "")
+
         row = [
             datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             data.get("fio"),
@@ -344,6 +350,7 @@ def save_to_google_sheets(data):
             data.get("region"),
             data.get("known"),
             data.get("goal"),
+            chat_id  # ⬅️ Добавляем chat_id
             data.get("contact"),
             data.get("case_type"),
             data.get("recommendations")
