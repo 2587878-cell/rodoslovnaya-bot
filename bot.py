@@ -350,7 +350,7 @@ def save_to_google_sheets(data):
             data.get("region"),
             data.get("known"),
             data.get("goal"),
-            chat_id  # ⬅️ Добавляем chat_id
+            chat_id.get("chat_id"), # ⬅️ Добавляем chat_id
             data.get("contact"),
             data.get("case_type"),
             data.get("recommendations")
