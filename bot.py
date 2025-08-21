@@ -255,7 +255,6 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Известно: {data['known']}
 Цель: {data['goal']}
 
-👪 Анализ фамилии:
 {surname_analysis}
 
 🧠 Рекомендации от Rodoslovnaya.pro:
