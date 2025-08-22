@@ -3,7 +3,7 @@ import os
 import logging
 import json  # ✅ Убедись, что импорт json здесь
 import asyncio  # <-- ЭТА СТРОКА ДОЛЖНА БЫТЬ!
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup 
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -357,6 +357,61 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "case_type": case_type,
         "recommendations": response
     })
+    # 🔔 ЗАПУСКАЕМ АВТОМАТИЧЕСКУЮ РАССЫЛКУ
+    async def send_follow_ups():
+        try:
+            # 0 день — сразу
+            await asyncio.sleep(1)  # небольшая задержка
+            keyboard = [[InlineKeyboardButton("Получить консультацию", callback_data="consultation")]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await context.bot.send_message(
+                chat_id=chat_id,
+                text=f"👋 Спасибо за обращение!\n"
+                     "Подписывайтесь на @rodoslovnaya.pro — свежие подсказки по архивам.\n"
+                     "Подарим бесплатную мини-консультацию: подскажем, с чего начать. Нажмите «Получить консультацию».",
+                reply_markup=reply_markup
+            )
+
+            # 3 день
+            await asyncio.sleep(3 * 24 * 3600)  # 3 дня
+            await context.bot.send_message(
+                chat_id=chat_id,
+                text="📜 Уже заглянули в @rodoslovnaya_pro? Там как раз разбор по запросам в ЗАГС и 100-летнему сроку.\n"
+                     "Хотите — дадим короткий план на вашу ситуацию!"
+            )
+
+            # 7 день
+            await asyncio.sleep(4 * 24 * 3600)  # ещё 4 дня = 7 день
+            keyboard = [[InlineKeyboardButton("Получить консультацию", callback_data="consultation")]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await context.bot.send_message(
+                chat_id=chat_id,
+                text="🎁 Держим для вас бесплатную консультацию: 3–5 шагов, куда писать и что приложить.\n"
+                     "Нажмите «Получить консультацию» — ответим сегодня!",
+                reply_markup=reply_markup
+            )
+
+            # 14 день
+            await asyncio.sleep(7 * 24 * 3600)  # ещё 7 дней = 14 день
+            await context.bot.send_message(
+                chat_id=chat_id,
+                text="✨ Подарочные сертификаты для близких — консультация или исследование рода.\n"
+                     "Промокод **PRO10** на скидку 10% при оплате онлайн на http://rodoslovnaya.pro/"
+            )
+
+            # 30 день
+            await asyncio.sleep(16 * 24 * 3600)  # ещё 16 дней = 30 день
+            await context.bot.send_message(
+                chat_id=chat_id,
+                text="🕰 Готовы собрать вашу семейную историю: архивы + красивый альбом.\n"
+                     "Подобрать стартовый пакет можно на http://rodoslovnaya.pro/"
+            )
+
+        except Exception as e:
+            print(f"❌ Не удалось отправить сообщение: {e}")
+    chat_id = update.effective_chat.id  # ✅ Добавь эту строку
+    # Запускаем в фоне
+    asyncio.create_task(send_follow_ups())
 
     return ConversationHandler.END
 
@@ -400,13 +455,41 @@ def save_to_google_sheets(data):
             data.get("phone"),
             data.get("telegram"),
             data.get("case_type"),
-            data.get("recommendations")
+            data.get("recommendations"),
+            data.get("consultation_requested", "")
         ]
         sheet.append_row(row)
         print("✅ 6. ДАННЫЕ УСПЕШНО ДОБАВЛЕНЫ В ТАБЛИЦУ!")
     except Exception as e:
         print(f"❌ ОШИБКА при сохранении: {e}")
+# 🔽 СЮДА ВСТАВЛЯЕМ button_callback 🔽
+async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()  # Подтверждаем нажатие
 
+    if query.data == "consultation":
+        await query.edit_message_text(text="✅ Спасибо! Ваш запрос на консультацию принят. Мы свяжемся с вами в ближайшее время.")
+
+        chat_id = query.message.chat_id
+        user_name = query.from_user.full_name
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        print(f"📝 Консультация запрошена: chat_id={chat_id}, пользователь={user_name}, время={timestamp}")
+
+        try:
+            save_to_google_sheets({
+                "fio": user_name,
+                "chat_id": chat_id,
+                "known": "Запрос на консультацию",
+                "goal": "Получить бесплатную консультацию",
+                "case_type": "консультация",
+                "recommendations": f"Запрос от пользователя через кнопку. Время: {timestamp}",
+                "consultation_requested": timestamp,
+            })
+        except Exception as e:
+            print(f"❌ Ошибка при сохранении запроса на консультацию: {e}")
+
+# 🔼 СЮДА ВСТАВЛЯЕМ button_callback 🔼
 def main():
     TOKEN = os.getenv("TELEGRAM_TOKEN")
     if not TOKEN:
@@ -451,6 +534,7 @@ def main():
 
     # Добавляем обработчик
     app.add_handler(conv_handler)
+    app.add_handler(CallbackQueryHandler(button_callback))
 
     # Запускаем бота
     app.run_polling()
