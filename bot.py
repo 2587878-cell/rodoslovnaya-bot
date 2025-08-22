@@ -466,9 +466,7 @@ def save_to_google_sheets(data):
 # 🔽 СЮДА ВСТАВЛЯЕМ button_callback 🔽
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()  # Подтверждаем нажатие
-    # Логируем
-        print(f"📝 Нажата кнопка: {query.data}, chat_id={query.message.chat_id}")
+    await query.answer()
 
     if query.data == "consultation":
         await query.edit_message_text(text="✅ Спасибо! Ваш запрос на консультацию принят. Мы свяжемся с вами в ближайшее время.")
@@ -477,7 +475,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_name = query.from_user.full_name
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        print(f"📝 Консультация запрошена: chat_id={chat_id}, пользователь={user_name}, время={timestamp}")
+        print(f"📝 Нажата кнопка: {query.data}, chat_id={chat_id}, пользователь={user_name}, время={timestamp}")
 
         try:
             save_to_google_sheets({
@@ -487,7 +485,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "goal": "Получить бесплатную консультацию",
                 "case_type": "консультация",
                 "recommendations": f"Запрос от пользователя через кнопку. Время: {timestamp}",
-                "consultation_requested": timestamp,
+                "consultation_requested": timestamp
             })
         except Exception as e:
             print(f"❌ Ошибка при сохранении запроса на консультацию: {e}")
