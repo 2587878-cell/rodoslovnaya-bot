@@ -362,13 +362,13 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     async def send_follow_ups():
         try:
             # 0 день — сразу
-            await asyncio.sleep(1)  # небольшая задержка
+            await asyncio.sleep(30)  # небольшая задержка
             keyboard = [[InlineKeyboardButton("Получить консультацию", callback_data="consultation")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await context.bot.send_message(
                 chat_id=chat_id,
                 text=f"👋 Спасибо за обращение!\n"
-                     "Подписывайтесь на @rodoslovnaya.pro — свежие подсказки по архивам.\n"
+                     "Подписывайтесь на @rodoslovnaya_pro — свежие подсказки по архивам.\n"
                      "Подарим бесплатную мини-консультацию: подскажем, с чего начать. Нажмите «Получить консультацию».",
                 reply_markup=reply_markup
             )
