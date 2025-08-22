@@ -11,7 +11,7 @@ from telegram.ext import (
     filters,
     ConversationHandler,
     ContextTypes,
-    CallbackQueryHandler,
+    CallbackQueryHandler
 )
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -366,7 +366,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
             keyboard = [[InlineKeyboardButton("Получить консультацию", callback_data="consultation")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await context.bot.send_message(
-                chat_id=chat_id,
+                chat_id=update.effective_chat.id,
                 text=f"👋 Спасибо за обращение!\n"
                      "Подписывайтесь на @rodoslovnaya_pro — свежие подсказки по архивам.\n"
                      "Подарим бесплатную мини-консультацию: подскажем, с чего начать. Нажмите «Получить консультацию».",
@@ -376,7 +376,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # 3 день
             await asyncio.sleep(3 * 24 * 3600)  # 3 дня
             await context.bot.send_message(
-                chat_id=chat_id,
+                chat_id=update.effective_chat.id,
                 text="📜 Уже заглянули в @rodoslovnaya_pro? Там как раз разбор по запросам в ЗАГС и 100-летнему сроку.\n"
                      "Хотите — дадим короткий план на вашу ситуацию!"
             )
@@ -386,7 +386,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
             keyboard = [[InlineKeyboardButton("Получить консультацию", callback_data="consultation")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await context.bot.send_message(
-                chat_id=chat_id,
+                chat_id=update.effective_chat.id,
                 text="🎁 Держим для вас бесплатную консультацию: 3–5 шагов, куда писать и что приложить.\n"
                      "Нажмите «Получить консультацию» — ответим сегодня!",
                 reply_markup=reply_markup
@@ -395,7 +395,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # 14 день
             await asyncio.sleep(7 * 24 * 3600)  # ещё 7 дней = 14 день
             await context.bot.send_message(
-                chat_id=chat_id,
+                chat_id=update.effective_chat.id,
                 text="✨ Подарочные сертификаты для близких — консультация или исследование рода.\n"
                      "Промокод **PRO10** на скидку 10% при оплате онлайн на http://rodoslovnaya.pro/"
             )
@@ -403,7 +403,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # 30 день
             await asyncio.sleep(16 * 24 * 3600)  # ещё 16 дней = 30 день
             await context.bot.send_message(
-                chat_id=chat_id,
+                chat_id=update.effective_chat.id,
                 text="🕰 Готовы собрать вашу семейную историю: архивы + красивый альбом.\n"
                      "Подобрать стартовый пакет можно на http://rodoslovnaya.pro/"
             )
@@ -467,6 +467,8 @@ def save_to_google_sheets(data):
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()  # Подтверждаем нажатие
+    # Логируем
+        print(f"📝 Нажата кнопка: {query.data}, chat_id={query.message.chat_id}")
 
     if query.data == "consultation":
         await query.edit_message_text(text="✅ Спасибо! Ваш запрос на консультацию принят. Мы свяжемся с вами в ближайшее время.")
@@ -535,7 +537,7 @@ def main():
 
     # Добавляем обработчик
     app.add_handler(conv_handler)
-    app.add_handler(CallbackQueryHandler(button_callback))
+    app.add_handler(CallbackQueryHandler(button_callback))  # ✅ Должно быть!
 
     # Запускаем бота
     app.run_polling()
