@@ -11,6 +11,7 @@ from telegram.ext import (
     filters,
     ConversationHandler,
     ContextTypes,
+    CallbackQueryHandler,
 )
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
