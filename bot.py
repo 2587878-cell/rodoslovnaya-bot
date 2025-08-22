@@ -465,8 +465,10 @@ def save_to_google_sheets(data):
         print(f"❌ ОШИБКА при сохранении: {e}")
 # 🔽 СЮДА ВСТАВЛЯЕМ button_callback 🔽
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print("🔥 button_callback вызвана!")  # 🔥 Это должно появиться в логах
     query = update.callback_query
     await query.answer()
+    print(f"📝 Нажата кнопка: {query.data}, chat_id={query.message.chat_id}")
 
     if query.data == "consultation":
         await query.edit_message_text(text="✅ Спасибо! Ваш запрос на консультацию принят. Мы свяжемся с вами в ближайшее время.")
