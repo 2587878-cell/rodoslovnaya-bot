@@ -463,6 +463,7 @@ def save_to_google_sheets(data):
         print("✅ 6. ДАННЫЕ УСПЕШНО ДОБАВЛЕНЫ В ТАБЛИЦУ!")
     except Exception as e:
         print(f"❌ ОШИБКА при сохранении: {e}")
+        
 # 🔽 СЮДА ВСТАВЛЯЕМ button_callback 🔽
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("🔥 START: button_callback вызвана!")  # 🔥 Должно быть в логах
@@ -491,7 +492,9 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             })
         except Exception as e:
             print(f"❌ Ошибка при сохранении запроса на консультацию: {e}")
+            
 # 🔼 СЮДА ВСТАВЛЯЕМ button_callback 🔼
+
 def main():
     TOKEN = os.getenv("TELEGRAM_TOKEN")
     if not TOKEN:
