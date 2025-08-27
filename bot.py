@@ -540,7 +540,6 @@ def main():
         .http_version("1.1")  
         .build()
     )
-
     # Добавляем обработчик
     app.add_handler(conv_handler)
     app.add_handler(CallbackQueryHandler(button_callback))  # ✅ Должно быть!
