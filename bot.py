@@ -365,6 +365,10 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     return ConversationHandler.END
     
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("❌ Анкета отменена. Чтобы начать заново, нажмите /start")
+    return ConversationHandler.END
+    
 # 🔔 ЗАПУСКАЕМ АВТОМАТИЧЕСКУЮ РАССЫЛКУ
 async def send_follow_ups(chat_id: int):
         try:
@@ -526,7 +530,10 @@ def main():
             STEP_GOAL: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_goal)],
             STEP_CONTACT: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_contact)],
         },
-        fallbacks=[]
+        fallbacks=[
+            CommandHandler("start", start),
+            CommandHandler("cancel", cancel)
+        ]
     )
 
     # Создаём приложение
