@@ -472,16 +472,12 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()  # ✅ Подтверждаем нажатие
     print("✅ query.answer() отправлен")  # ✅ Должно быть
-
     if query.data == "consultation":
         await query.edit_message_text(text="✅ Спасибо! Ваш запрос на консультацию принят. Мы свяжемся с вами в ближайшее время.")
-
         chat_id = query.message.chat_id
         user_name = query.from_user.full_name
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
         print(f"📝 Нажата кнопка: {query.data}, chat_id={chat_id}, пользователь={user_name}, время={timestamp}")
-
         try:
             save_to_google_sheets({
                 "fio": user_name,
