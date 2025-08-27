@@ -370,7 +370,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
     
 # 🔔 ЗАПУСКАЕМ АВТОМАТИЧЕСКУЮ РАССЫЛКУ
-async def send_follow_ups(chat_id: int):
+async def send_follow_ups(chat_id: int, bot):
         try:
             # 0 день — сразу
             await asyncio.sleep(30)  # небольшая задержка
@@ -472,11 +472,12 @@ def save_to_google_sheets(data):
         
 # 🔽 СЮДА ВСТАВЛЯЕМ button_callback 🔽
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print("🔥 START: button_callback вызвана!")  # 🔥 Должно быть в логах
+    print("🔥 START: button_callback вызвана!", flush=True)  # 🔥 Должно быть в логах
     query = update.callback_query
 
     try:
         await query.answer()  # ✅ Подтверждаем нажатие
+        print("✅ query.answer() отправлен", flush=True)
 
         if query.data == "consultation":
             # ✅ ВАЖНО: в PTB v20+ нет message.chat_id — используем .chat.id
