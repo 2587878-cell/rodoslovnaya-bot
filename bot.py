@@ -343,6 +343,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Сохраняем chat_id
     data["chat_id"] = update.effective_chat.id
+    chat_id = data["chat_id"]  # ✅ Сохраняем в переменную
     # Сохраняем в таблицу
     save_to_google_sheets({
         "fio": data.get("fio"),
@@ -410,7 +411,6 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         except Exception as e:
             print(f"❌ Не удалось отправить сообщение: {e}")
-    chat_id = update.effective_chat.id  # ✅ Добавь эту строку
     # Запускаем в фоне
     asyncio.create_task(send_follow_ups())
 
