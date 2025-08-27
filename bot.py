@@ -531,7 +531,7 @@ def main():
         .write_timeout(30)
         .connect_timeout(30)
         .pool_timeout(30)
-        .get_updates_timeout(10)      # ✅ Обязательно
+        .get_updates_pool_timeout(10) # ✅ Обязательно
         .http_version("1.1")  
         .build()
     )
