@@ -474,7 +474,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("✅ query.answer() отправлен")  # ✅ Должно быть
     if query.data == "consultation":
         await query.edit_message_text(text="✅ Спасибо! Ваш запрос на консультацию принят. Мы свяжемся с вами в ближайшее время.")
-        chat_id = query.message.chat_id
+        chat_id = query.message.chat.id
         user_name = query.from_user.full_name
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"📝 Нажата кнопка: {query.data}, chat_id={chat_id}, пользователь={user_name}, время={timestamp}")
@@ -538,7 +538,7 @@ def main():
     )
     # Добавляем обработчик
     app.add_handler(conv_handler)
-    app.add_handler(CallbackQueryHandler(button_callback))  # ✅ Должно быть!
+    app.add_handler(CallbackQueryHandler(button_callback, pattern=r"^consultation$")) # ✅ Должно быть!
 
     # Запускаем бота
     app.run_polling()
