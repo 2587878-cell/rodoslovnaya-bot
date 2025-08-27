@@ -343,8 +343,6 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Сохраняем chat_id
     data["chat_id"] = update.effective_chat.id
-    chat_id = data["chat_id"]  # ✅ Сохраняем в переменную
-
     # Сохраняем в таблицу
     save_to_google_sheets({
         "fio": data.get("fio"),
@@ -470,27 +468,32 @@ def save_to_google_sheets(data):
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("🔥 START: button_callback вызвана!")  # 🔥 Должно быть в логах
     query = update.callback_query
-    await query.answer()  # ✅ Подтверждаем нажатие
-    print("✅ query.answer() отправлен")  # ✅ Должно быть
-    if query.data == "consultation":
-        await query.edit_message_text(text="✅ Спасибо! Ваш запрос на консультацию принят. Мы свяжемся с вами в ближайшее время.")
-        chat_id = query.message.chat.id
-        user_name = query.from_user.full_name
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"📝 Нажата кнопка: {query.data}, chat_id={chat_id}, пользователь={user_name}, время={timestamp}")
-        try:
-            save_to_google_sheets({
-                "fio": user_name,
-                "chat_id": chat_id,
-                "known": "Запрос на консультацию",
-                "goal": "Получить бесплатную консультацию",
-                "case_type": "консультация",
-                "recommendations": f"Запрос от пользователя через кнопку. Время: {timestamp}",
-                "consultation_requested": timestamp
-            })
-        except Exception as e:
-            print(f"❌ Ошибка при сохранении запроса на консультацию: {e}")
+
+    try:
+        await query.answer()  # ✅ Подтверждаем нажатие
+
+        if query.data == "consultation":
+            # ✅ ВАЖНО: в PTB v20+ нет message.chat_id — используем .chat.id
+            chat_id = query.message.chat.id
+            user_name = query.from_user.full_name
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             
+            await query.edit_message_text(text="✅ Спасибо! Ваш запрос на консультацию принят. Мы свяжемся с вами в ближайшее время.")
+            print(f"📝 Нажата кнопка: {query.data}, chat_id={chat_id}, пользователь={user_name}, время={timestamp}")
+            try:
+                save_to_google_sheets({
+                    "fio": user_name,
+                    "chat_id": chat_id,
+                    "known": "Запрос на консультацию",
+                    "goal": "Получить бесплатную консультацию",
+                    "case_type": "консультация",
+                    "recommendations": f"Запрос от пользователя через кнопку. Время: {timestamp}",
+                    "consultation_requested": timestamp
+                })
+            except Exception as e:
+                print(f"❌ Ошибка при сохранении запроса на консультацию: {e}")
+    except Exception as e:
+        ("❌ Ошибка в button_callback")
 # 🔼 СЮДА ВСТАВЛЯЕМ button_callback 🔼
 
 def main():
