@@ -4,6 +4,7 @@ import logging
 import json  # ✅ Убедись, что импорт json здесь
 import asyncio  # <-- ЭТА СТРОКА ДОЛЖНА БЫТЬ!
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup 
+from telegram import Update as TgUpdate
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -358,14 +359,20 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "case_type": case_type,
         "recommendations": response
     })
-    # 🔔 ЗАПУСКАЕМ АВТОМАТИЧЕСКУЮ РАССЫЛКУ
-    async def send_follow_ups(chat_id: int):
+    # Запускаем в фоне
+    chat_id = data["chat_id"]
+    asyncio.create_task(send_follow_ups(chat_id, context.bot))  # ✅ Передаём bot
+
+    return ConversationHandler.END
+    
+# 🔔 ЗАПУСКАЕМ АВТОМАТИЧЕСКУЮ РАССЫЛКУ
+async def send_follow_ups(chat_id: int):
         try:
             # 0 день — сразу
             await asyncio.sleep(30)  # небольшая задержка
             keyboard = [[InlineKeyboardButton("Получить консультацию", callback_data="consultation")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await context.bot.send_message(
+            await bot.send_message(
                 chat_id=chat_id,  # ✅ Используем переданный chat_id
                 text=f"👋 Спасибо за обращение!\n"
                      "Подписывайтесь на @rodoslovnaya_pro — свежие подсказки по архивам.\n"
@@ -375,7 +382,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             # 3 день
             await asyncio.sleep(3 * 24 * 3600)  # 3 дня
-            await context.bot.send_message(
+            await bot.send_message(
                 chat_id=chat_id,
                 text="📜 Уже заглянули в @rodoslovnaya_pro? Там как раз разбор по запросам в ЗАГС и 100-летнему сроку.\n"
                      "Хотите — дадим короткий план на вашу ситуацию!"
@@ -385,7 +392,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await asyncio.sleep(4 * 24 * 3600)  # ещё 4 дня = 7 день
             keyboard = [[InlineKeyboardButton("Получить консультацию", callback_data="consultation")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await context.bot.send_message(
+            await bot.send_message(
                 chat_id=chat_id,
                 text="🎁 Держим для вас бесплатную консультацию: 3–5 шагов, куда писать и что приложить.\n"
                      "Нажмите «Получить консультацию» — свяжимся с Вами в ближайшее время!",
@@ -394,7 +401,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             # 14 день
             await asyncio.sleep(7 * 24 * 3600)  # ещё 7 дней = 14 день
-            await context.bot.send_message(
+            await bot.send_message(
                 chat_id=chat_id,
                 text="✨ Подарочные сертификаты для близких — консультация или исследование рода.\n"
                      "Промокод **PRO10** на скидку 10% при оплате онлайн на http://rodoslovnaya.pro/"
@@ -402,7 +409,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             # 30 день
             await asyncio.sleep(16 * 24 * 3600)  # ещё 16 дней = 30 день
-            await context.bot.send_message(
+            await bot.send_message(
                 chat_id=chat_id,
                 text="🕰 Готовы собрать вашу семейную историю: архивы + красивый альбом.\n"
                      "Подобрать стартовый пакет можно на http://rodoslovnaya.pro/"
@@ -410,11 +417,6 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         except Exception as e:
             print(f"❌ Не удалось отправить сообщение: {e}")
-    # Запускаем в фоне
-    chat_id = data["chat_id"]
-    asyncio.create_task(send_follow_ups(chat_id))
-
-    return ConversationHandler.END
 
 def save_to_google_sheets(data):
     try:
@@ -493,7 +495,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except Exception as e:
                 print(f"❌ Ошибка при сохранении запроса на консультацию: {e}")
     except Exception as e:
-        ("❌ Ошибка в button_callback")
+        print("❌ Ошибка в button_callback")
 # 🔼 СЮДА ВСТАВЛЯЕМ button_callback 🔼
 
 def main():
@@ -544,7 +546,10 @@ def main():
     app.add_handler(CallbackQueryHandler(button_callback, pattern=r"^consultation$")) # ✅ Должно быть!
 
     # Запускаем бота
-    app.run_polling()
+    app.run_polling(
+    allowed_updates=TgUpdate.ALL_TYPES,
+    drop_pending_updates=True,
+)
 
 # ✅ Запускаем main()
 if __name__ == "__main__":
