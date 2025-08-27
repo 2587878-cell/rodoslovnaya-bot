@@ -361,7 +361,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "recommendations": response
     })
     # 🔔 ЗАПУСКАЕМ АВТОМАТИЧЕСКУЮ РАССЫЛКУ
-    async def send_follow_ups():
+    async def send_follow_ups(chat_id: int):
         try:
             # 0 день — сразу
             await asyncio.sleep(30)  # небольшая задержка
