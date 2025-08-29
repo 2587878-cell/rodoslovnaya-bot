@@ -496,7 +496,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     "goal": "Получить бесплатную консультацию",
                     "case_type": "консультация",
                     "recommendations": f"Запрос от пользователя через кнопку. Время: {timestamp}",
-                    "consultation_requested": timestamp
+                    "consultation_requested": timestamp,
                     "telegram": telegram  # ✅ Теперь передаётся!
                 })
             except Exception as e:
