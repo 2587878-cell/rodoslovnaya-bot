@@ -482,6 +482,8 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # ✅ ВАЖНО: в PTB v20+ нет message.chat_id — используем .chat.id
             chat_id = query.message.chat.id
             user_name = query.from_user.full_name
+            username = query.from_user.username
+            telegram = f"@{username}" if username else ""
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             
             await query.edit_message_text(text="✅ Спасибо! Ваш запрос на консультацию принят. Мы свяжемся с вами в ближайшее время.")
@@ -495,6 +497,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     "case_type": "консультация",
                     "recommendations": f"Запрос от пользователя через кнопку. Время: {timestamp}",
                     "consultation_requested": timestamp
+                    "telegram": telegram  # ✅ Теперь передаётся!
                 })
             except Exception as e:
                 print(f"❌ Ошибка при сохранении запроса на консультацию: {e}")
