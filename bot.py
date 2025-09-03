@@ -510,6 +510,38 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         print("❌ Ошибка в button_callback")
 # 🔼 СЮДА ВСТАВЛЯЕМ button_callback 🔼
+async def consultation_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Отправляем ссылку на запись
+    await update.message.reply_text(
+        "✅ Спасибо за интерес к консультации!\n\n"
+        "Выберите удобное время для бесплатной 15-минутной консультации:\n\n"
+        "🔗 [Записаться на консультацию](https://calendar.app.google/MP5M6V6Yc5qjjQvXA)\n\n"
+        "После записи вы получите напоминание. Мы свяжемся с вами в выбранное время!",
+        parse_mode="Markdown",
+        disable_web_page_preview=False
+    )
+
+    # Сохраняем в таблицу (опционально)
+    user = update.effective_user
+    chat_id = update.effective_chat.id
+    user_name = user.full_name
+    username = user.username
+    telegram = f"@{username}" if username else ""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    try:
+        save_to_google_sheets({
+            "fio": user_name,
+            "chat_id": chat_id,
+            "known": "Команда /consultation",
+            "goal": "Получить бесплатную консультацию",
+            "case_type": "консультация",
+            "recommendations": f"Пользователь вызвал /consultation. Время: {timestamp}",
+            "consultation_requested": timestamp,
+            "telegram": telegram
+        })
+    except Exception as e:
+        print(f"❌ Ошибка при сохранении /consultation: {e}")
 
 def main():
     TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -559,6 +591,7 @@ def main():
     )
     # Добавляем обработчик
     app.add_handler(conv_handler)
+    app.add_handler(CommandHandler("consultation", consultation_command))
     app.add_handler(CallbackQueryHandler(button_callback, pattern=r"^consultation$")) # ✅ Должно быть!
 
     # Запускаем бота
