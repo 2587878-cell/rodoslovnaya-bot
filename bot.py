@@ -486,7 +486,13 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             telegram = f"@{username}" if username else ""
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             
-            await query.edit_message_text(text="✅ Спасибо! Ваш запрос на консультацию принят. Мы свяжемся с вами в ближайшее время.")
+            await query.edit_message_text(
+            text="✅ Спасибо! Выберите удобное время для бесплатной консультации:\n\n"
+                 "🔗 [Записаться на консультацию](https://calendar.app.google/MP5M6V6Yc5qjjQvXA)\n\n"
+                 "После записи вы получите подтверждение и напоминание!",
+            parse_mode="Markdown",
+            disable_web_page_preview=False
+            )
             print(f"📝 Нажата кнопка: {query.data}, chat_id={chat_id}, пользователь={user_name}, время={timestamp}")
             try:
                 save_to_google_sheets({
