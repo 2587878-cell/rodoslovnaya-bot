@@ -488,7 +488,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             await query.edit_message_text(
             text="✅ Спасибо! Выберите удобное время для бесплатной консультации:\n\n"
-                 "🔗 [Записаться на консультацию](https://calendar.app.google/MP5M6V6Yc5qjjQvXA)\n\n"
+                 "🔗 [Записаться на консультацию](https://calendar.app.google/YP6LwXcUwkT6tDJP9)\n\n"
                  "После записи вы получите подтверждение и напоминание!",
             parse_mode="Markdown",
             disable_web_page_preview=False
@@ -515,7 +515,7 @@ async def consultation_command(update: Update, context: ContextTypes.DEFAULT_TYP
     await update.message.reply_text(
         "✅ Спасибо за интерес к консультации!\n\n"
         "Выберите удобное время для бесплатной 15-минутной консультации:\n\n"
-        "🔗 [Записаться на консультацию](https://calendar.app.google/MP5M6V6Yc5qjjQvXA)\n\n"
+        "🔗 [Записаться на консультацию](https://calendar.app.google/YP6LwXcUwkT6tDJP9)\n\n"
         "После записи вы получите напоминание. Мы свяжемся с вами в выбранное время!",
         parse_mode="Markdown",
         disable_web_page_preview=False
