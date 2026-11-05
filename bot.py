@@ -281,7 +281,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         client = OpenAI(api_key=api_key)
     
         completion = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": """
 Ты — профессиональный генеалог. Пиши чётко, по делу, с источниками, тарифами и ссылками. 
